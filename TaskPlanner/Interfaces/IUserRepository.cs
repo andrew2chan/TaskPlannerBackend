@@ -1,4 +1,5 @@
-﻿using TaskPlanner.Models;
+﻿using TaskPlanner.DTOs;
+using TaskPlanner.Models;
 
 namespace TaskPlanner.Interfaces
 {
@@ -6,6 +7,8 @@ namespace TaskPlanner.Interfaces
     {
         ICollection<User> GetUsers();
         User GetUser(int id);
+        bool CreateUser(User user);
         bool UserExists(int id);
+        bool Save();
     }
 }

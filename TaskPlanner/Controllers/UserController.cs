@@ -22,6 +22,7 @@ namespace TaskPlanner.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
+        [ProducesResponseType(400)]
         public IActionResult GetUsers()
         {
             var users = _mapper.Map<List<UserDto>>(_userRepository.GetUsers());
@@ -46,6 +47,38 @@ namespace TaskPlanner.Controllers
                 return BadRequest(ModelState);
 
             return Ok(user);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult CreateUser([FromBody] UserDto user)
+        {
+            if(user == null)
+                return BadRequest(ModelState);
+
+            var existingUsers = _userRepository.GetUsers().Where(u => u.Email.Trim().ToUpper() == user.Email.Trim().ToUpper()).FirstOrDefault();
+
+            if(existingUsers != null)
+            {
+                ModelState.AddModelError("", "User already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var newUser = _mapper.Map<User>(user);
+
+            if(!_userRepository.CreateUser(newUser))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Created!");
         }
     }
 }

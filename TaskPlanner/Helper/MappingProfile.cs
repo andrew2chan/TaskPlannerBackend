@@ -9,6 +9,8 @@ namespace TaskPlanner.Helper
         public MappingProfile()
         {
             CreateMap<User, UserDto>();
+            CreateMap<UserDto, User>();
+            CreateMap<Activities, ActivitiesDto>();
         }
     }
 }

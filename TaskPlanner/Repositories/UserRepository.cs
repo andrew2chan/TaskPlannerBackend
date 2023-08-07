@@ -1,5 +1,6 @@
 ﻿using SQLitePCL;
 using TaskPlanner.Context;
+using TaskPlanner.DTOs;
 using TaskPlanner.Interfaces;
 using TaskPlanner.Models;
 
@@ -14,6 +15,22 @@ namespace TaskPlanner.Repositories
             _context = context;
         }
 
+        public bool CreateUser(User user)
+        {
+            _context.Add(user);
+            Save();
+
+            var newUser = _context.Users.Where(u => u.Email == user.Email).FirstOrDefault();
+            var newPlannedTask = new PlannedTasks()
+            {
+                UserId = newUser.Id,
+                User = newUser
+            };
+
+            _context.PlannedTasks.Add(newPlannedTask);
+            return Save();
+        }
+
         public User GetUser(int id)
         {
             return _context.Users.Where(u => u.Id == id).FirstOrDefault();
@@ -22,6 +39,12 @@ namespace TaskPlanner.Repositories
         public ICollection<User> GetUsers()
         {
             return _context.Users.ToList();
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0 ? true : false;
         }
 
         public bool UserExists(int id)
