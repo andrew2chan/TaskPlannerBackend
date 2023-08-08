@@ -11,6 +11,7 @@ namespace TaskPlanner.Helper
             CreateMap<User, UserDto>();
             CreateMap<UserDto, User>();
             CreateMap<Activities, ActivitiesDto>();
+            CreateMap<ActivitiesDto, Activities>();
         }
     }
 }

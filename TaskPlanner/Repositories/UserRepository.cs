@@ -21,13 +21,19 @@ namespace TaskPlanner.Repositories
             Save();
 
             var newUser = _context.Users.Where(u => u.Email == user.Email).FirstOrDefault();
-            var newPlannedTask = new PlannedTasks()
+            var newPlannedTask = new PlannedTasks() //create a new planned task for each new user
             {
                 UserId = newUser.Id,
                 User = newUser
             };
 
             _context.PlannedTasks.Add(newPlannedTask);
+            return Save();
+        }
+
+        public bool DeleteUser(User user)
+        {
+            _context.Remove(user);
             return Save();
         }
 
@@ -45,6 +51,12 @@ namespace TaskPlanner.Repositories
         {
             var saved = _context.SaveChanges();
             return saved > 0 ? true : false;
+        }
+
+        public bool UpdateUser(User user)
+        {
+            _context.Update(user);
+            return Save();
         }
 
         public bool UserExists(int id)

@@ -6,6 +6,10 @@ namespace TaskPlanner.Interfaces
     {
         ICollection<Activities> GetAllActivities();
         ICollection<Activities> GetActivitiesById(int id);
+        ICollection<Activities> GetActivitiesByUserId(int userId);
+        bool DeleteActivity(Activities activity);
+        bool CreateActivity(Activities activity);
         bool ActivitiesExists(int id);
+        bool Save();
     }
 }

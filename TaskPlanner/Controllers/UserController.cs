@@ -71,6 +71,8 @@ namespace TaskPlanner.Controllers
                 return BadRequest(ModelState);
 
             var newUser = _mapper.Map<User>(user);
+            newUser.HashedPassword = "placeholder hashed pass";
+            newUser.Salt = "placeholder salt";
 
             if(!_userRepository.CreateUser(newUser))
             {
@@ -79,6 +81,55 @@ namespace TaskPlanner.Controllers
             }
 
             return Ok("Created!");
+        }
+
+        [HttpDelete("{userId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteUser(int userId)
+        {
+            if(!_userRepository.UserExists(userId))
+                return BadRequest(ModelState);
+
+            var user = _userRepository.GetUser(userId);
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(!_userRepository.DeleteUser(user))
+            {
+                ModelState.AddModelError("", "Something went wrong with deleting");
+            }
+
+            return Ok("Deleted!");
+        }
+
+        [HttpPut("{userId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateUser(int userId, [FromBody] UserDto updatedUser)
+        {
+            if(!_userRepository.UserExists(userId))
+                return BadRequest(ModelState);
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(updatedUser == null)
+                return BadRequest(ModelState);
+
+            var upUser = _mapper.Map<User>(updatedUser);
+            upUser.HashedPassword = "placeholder updated pass";
+            upUser.Salt = "placeholder updated salt";
+
+            if(!_userRepository.UpdateUser(upUser))
+            {
+                ModelState.AddModelError("", "Something went wrong with updating");
+            }
+
+            return NoContent();
         }
     }
 }
