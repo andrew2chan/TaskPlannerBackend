@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 using TaskPlanner.DTOs;
 using TaskPlanner.Interfaces;
 using TaskPlanner.Models;
@@ -58,6 +59,24 @@ namespace TaskPlanner.Controllers
         {
             if(user == null)
                 return BadRequest(ModelState);
+
+            if (ValidateEmail(user))
+            {
+                ModelState.AddModelError("", "Please enter a proper email address.");
+                return BadRequest(ModelState);
+            }
+
+            if (ValidatePassword(user) == false)
+            {
+                ModelState.AddModelError("", "Please make sure to enter a valid password.");
+                return BadRequest(ModelState);
+            }
+
+            if (ValidateName(user) == false)
+            {
+                ModelState.AddModelError("", "Please make sure to enter a valid name.");
+                return BadRequest(ModelState);
+            }
 
             var existingUsers = _userRepository.GetUsers().Where(u => u.Email.Trim().ToUpper() == user.Email.Trim().ToUpper()).FirstOrDefault();
 
@@ -130,6 +149,42 @@ namespace TaskPlanner.Controllers
             }
 
             return NoContent();
+        }
+
+        private bool ValidateEmail(UserDto user)
+        {
+            var email = user.Email; //gets email from userDTO
+            String pattern = @"^[A-Z0-9+_.-]+@[A-Z0-9-]+[.][A-Z]+$"; //checks this pattern X@X.c
+
+            return !Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
+        }
+
+        private bool ValidatePassword(UserDto user)
+        {
+            var password = user.Password;
+
+            var passwordIsValid = true;
+
+            String pattern = @"\s{1,}";
+
+            if (password.Length == 0 || Regex.IsMatch(password, pattern, RegexOptions.IgnoreCase)) 
+                passwordIsValid = false;
+
+            return passwordIsValid;
+        }
+
+        private bool ValidateName(UserDto user)
+        {
+            var name = user.Name;
+
+            var nameIsValid = false;
+
+            String pattern = @"[A-Z]{1,}";
+
+            if (Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase))
+                nameIsValid = true;
+
+            return nameIsValid;
         }
     }
 }
