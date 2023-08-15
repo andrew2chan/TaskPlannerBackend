@@ -44,7 +44,7 @@ namespace TaskPlanner.Controllers
 
             var user = _mapper.Map<UserDto>(_userRepository.GetUser(id));
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             return Ok(user);
@@ -57,22 +57,22 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(500)]
         public IActionResult CreateUser([FromBody] UserDto user)
         {
-            if(user == null)
+            if (user == null)
                 return BadRequest(ModelState);
 
-            if (ValidateEmail(user))
+            if (ValidateEmail(user.Email))
             {
                 ModelState.AddModelError("", "Please enter a proper email address.");
                 return BadRequest(ModelState);
             }
 
-            if (ValidatePassword(user) == false)
+            if (ValidatePassword(user.Password) == false)
             {
                 ModelState.AddModelError("", "Please make sure to enter a valid password.");
                 return BadRequest(ModelState);
             }
 
-            if (ValidateName(user) == false)
+            if (ValidateName(user.Name) == false)
             {
                 ModelState.AddModelError("", "Please make sure to enter a valid name.");
                 return BadRequest(ModelState);
@@ -80,20 +80,20 @@ namespace TaskPlanner.Controllers
 
             var existingUsers = _userRepository.GetUsers().Where(u => u.Email.Trim().ToUpper() == user.Email.Trim().ToUpper()).FirstOrDefault();
 
-            if(existingUsers != null)
+            if (existingUsers != null)
             {
                 ModelState.AddModelError("", "User already exists");
                 return StatusCode(422, ModelState);
             }
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var newUser = _mapper.Map<User>(user);
             newUser.HashedPassword = "placeholder hashed pass";
             newUser.Salt = "placeholder salt";
 
-            if(!_userRepository.CreateUser(newUser))
+            if (!_userRepository.CreateUser(newUser))
             {
                 ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
@@ -108,15 +108,15 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteUser(int userId)
         {
-            if(!_userRepository.UserExists(userId))
+            if (!_userRepository.UserExists(userId))
                 return BadRequest(ModelState);
 
             var user = _userRepository.GetUser(userId);
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if(!_userRepository.DeleteUser(user))
+            if (!_userRepository.DeleteUser(user))
             {
                 ModelState.AddModelError("", "Something went wrong with deleting");
             }
@@ -130,20 +130,20 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(404)]
         public IActionResult UpdateUser(int userId, [FromBody] UserDto updatedUser)
         {
-            if(!_userRepository.UserExists(userId))
+            if (!_userRepository.UserExists(userId))
                 return BadRequest(ModelState);
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if(updatedUser == null)
+            if (updatedUser == null)
                 return BadRequest(ModelState);
 
             var upUser = _mapper.Map<User>(updatedUser);
             upUser.HashedPassword = "placeholder updated pass";
             upUser.Salt = "placeholder updated salt";
 
-            if(!_userRepository.UpdateUser(upUser))
+            if (!_userRepository.UpdateUser(upUser))
             {
                 ModelState.AddModelError("", "Something went wrong with updating");
             }
@@ -151,18 +151,41 @@ namespace TaskPlanner.Controllers
             return NoContent();
         }
 
-        private bool ValidateEmail(UserDto user)
+        [HttpPost("getUserByEmail")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult GetUserByEmail([FromBody] UserLoginDto user)
         {
-            var email = user.Email; //gets email from userDTO
+            if (!_userRepository.UserExists(user.Email))
+                return NotFound();
+
+            if (ValidateEmail(user.Email))
+            {
+                ModelState.AddModelError("", "Please enter a proper email address.");
+                return BadRequest(ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var retrievedUser = _userRepository.GetUser(user.Email);
+
+            if (retrievedUser.Password != user.Password)
+                return BadRequest();
+
+            return Ok(retrievedUser);
+        }
+
+        private bool ValidateEmail(string email)
+        {
             String pattern = @"^[A-Z0-9+_.-]+@[A-Z0-9-]+[.][A-Z]+$"; //checks this pattern X@X.c
 
             return !Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
         }
 
-        private bool ValidatePassword(UserDto user)
+        private bool ValidatePassword(string password)
         {
-            var password = user.Password;
-
             var passwordIsValid = true;
 
             String pattern = @"\s{1,}";
@@ -173,9 +196,8 @@ namespace TaskPlanner.Controllers
             return passwordIsValid;
         }
 
-        private bool ValidateName(UserDto user)
+        private bool ValidateName(string name)
         {
-            var name = user.Name;
 
             var nameIsValid = false;
 
@@ -186,5 +208,7 @@ namespace TaskPlanner.Controllers
 
             return nameIsValid;
         }
+
+
     }
 }

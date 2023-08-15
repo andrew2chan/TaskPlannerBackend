@@ -42,6 +42,11 @@ namespace TaskPlanner.Repositories
             return _context.Users.Where(u => u.Id == id).FirstOrDefault();
         }
 
+        public User GetUser(string email)
+        {
+            return _context.Users.Where(u => u.Email == email).FirstOrDefault();
+        }
+
         public ICollection<User> GetUsers()
         {
             return _context.Users.ToList();
@@ -62,6 +67,11 @@ namespace TaskPlanner.Repositories
         public bool UserExists(int id)
         {
             return _context.Users.Any(u => u.Id == id);
+        }
+
+        public bool UserExists(string email)
+        {
+            return _context.Users.Any(u => u.Email == email);
         }
     }
 }
