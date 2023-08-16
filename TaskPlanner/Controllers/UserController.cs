@@ -174,7 +174,14 @@ namespace TaskPlanner.Controllers
             if (retrievedUser.Password != user.Password)
                 return BadRequest();
 
-            return Ok(retrievedUser);
+            var returnObject = new
+            {
+                id = retrievedUser.Id,
+                email = retrievedUser.Email,
+                name = retrievedUser.Name
+            };
+
+            return Ok(returnObject);
         }
 
         private bool ValidateEmail(string email)
