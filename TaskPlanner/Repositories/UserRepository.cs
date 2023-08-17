@@ -1,4 +1,5 @@
-﻿using SQLitePCL;
+﻿using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 using TaskPlanner.Context;
 using TaskPlanner.DTOs;
 using TaskPlanner.Interfaces;

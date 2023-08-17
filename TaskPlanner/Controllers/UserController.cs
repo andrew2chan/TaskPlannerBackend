@@ -13,11 +13,13 @@ namespace TaskPlanner.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPlannedTasksRepository _plannedTasksRepository;
         private readonly IMapper _mapper;
 
-        public UserController(IUserRepository userRepository, IMapper mapper)
+        public UserController(IUserRepository userRepository, IPlannedTasksRepository plannedTasksRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _plannedTasksRepository = plannedTasksRepository;
             _mapper = mapper;
         }
 
@@ -170,6 +172,7 @@ namespace TaskPlanner.Controllers
                 return BadRequest(ModelState);
 
             var retrievedUser = _userRepository.GetUser(user.Email);
+            var plannedTaskByUserId = _plannedTasksRepository.GetPlannedTaskByUserId(retrievedUser.Id);
 
             if (retrievedUser.Password != user.Password)
                 return BadRequest();
@@ -178,7 +181,8 @@ namespace TaskPlanner.Controllers
             {
                 id = retrievedUser.Id,
                 email = retrievedUser.Email,
-                name = retrievedUser.Name
+                name = retrievedUser.Name,
+                plannedTasksId = plannedTaskByUserId.Id
             };
 
             return Ok(returnObject);

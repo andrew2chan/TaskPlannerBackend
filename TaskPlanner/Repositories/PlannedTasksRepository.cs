@@ -18,5 +18,10 @@ namespace TaskPlanner.Repositories
         {
             return _context.PlannedTasks.ToList();
         }
+
+        public PlannedTasks GetPlannedTaskByUserId(int userId)
+        {
+            return _context.PlannedTasks.Where(pt => pt.UserId == userId).FirstOrDefault();
+        }
     }
 }
