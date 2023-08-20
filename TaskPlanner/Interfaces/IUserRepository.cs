@@ -10,7 +10,7 @@ namespace TaskPlanner.Interfaces
         User GetUser(string email);
         bool CreateUser(User user);
         bool DeleteUser(User user);
-        bool UpdateUser(User user);
+        bool UpdateUser(int userId, UserDto user);
         bool UserExists(int id);
         bool UserExists(string email);
         bool Save();

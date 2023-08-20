@@ -59,9 +59,19 @@ namespace TaskPlanner.Repositories
             return saved > 0 ? true : false;
         }
 
-        public bool UpdateUser(User user)
+        public bool UpdateUser(int userId, UserDto userdto)
         {
-            _context.Update(user);
+            var user = _context.Users.Where(u => u.Id == userId).FirstOrDefault();
+
+            user.Email = userdto.Email;
+            user.Name = userdto.Name;
+
+            if (userdto.Password.Length > 0) //if no password is entered
+            {
+                user.Password = userdto.Password;
+            }
+
+            //_context.Update(user);
             return Save();
         }
 

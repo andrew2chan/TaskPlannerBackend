@@ -118,7 +118,9 @@ namespace TaskPlanner.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.DeleteUser(user))
+            var userToDelete = _userRepository.GetUser(userId);
+
+            if (!_userRepository.DeleteUser(userToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong with deleting");
             }
@@ -141,11 +143,13 @@ namespace TaskPlanner.Controllers
             if (updatedUser == null)
                 return BadRequest(ModelState);
 
-            var upUser = _mapper.Map<User>(updatedUser);
-            upUser.HashedPassword = "placeholder updated pass";
-            upUser.Salt = "placeholder updated salt";
+            if (ValidateName(updatedUser.Name) == false)
+            {
+                ModelState.AddModelError("", "Please make sure to enter a valid name.");
+                return BadRequest(ModelState);
+            }
 
-            if (!_userRepository.UpdateUser(upUser))
+            if (!_userRepository.UpdateUser(userId, updatedUser))
             {
                 ModelState.AddModelError("", "Something went wrong with updating");
             }
