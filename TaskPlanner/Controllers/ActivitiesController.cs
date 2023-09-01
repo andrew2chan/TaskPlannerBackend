@@ -77,6 +77,7 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(500)]
         public IActionResult CreateActivity([FromQuery] int userId, [FromBody] ActivitiesDto activity)
         {
+
             if (!_userRepository.UserExists(userId))
                 return NotFound();
 
@@ -91,7 +92,10 @@ namespace TaskPlanner.Controllers
             var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
             activityMap.PlannedTasksId = plannedTask.Id; //fill in the foreign key
             
-            if(!_activitiesRepository.CreateActivity(activityMap))
+            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToLocalTime();
+            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToLocalTime();
+
+            if (!_activitiesRepository.CreateActivity(activityMap))
             {
                 ModelState.AddModelError("", "Something went wrong with creating an activity");
                 return StatusCode(500, ModelState);
