@@ -127,5 +127,39 @@ namespace TaskPlanner.Controllers
 
             return Ok("Deleted activity!");
         }
+
+        [HttpPut]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
+        public IActionResult UpdateActivity([FromBody] ActivitiesDto activity)
+        {
+            if (!_activitiesRepository.ActivitiesExists(activity.Id))
+                return NotFound();
+
+            if(activity == null)
+                return BadRequest(ModelState);
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
+            
+            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToLocalTime();
+            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToLocalTime();
+
+            Console.WriteLine(activity.PlannedTasksId);
+
+            activityMap.PlannedTasksId = activity.PlannedTasksId;
+            activityMap.PlannedTasks = _plannedTasksRepository.GetAllPlannedTasks().Where(pt => pt.Id == activity.PlannedTasksId).FirstOrDefault();
+
+            if (!_activitiesRepository.UpdateActivity(activityMap))
+            {
+                ModelState.AddModelError("", "Something went wrong with updating activity");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Updated activity!");
+        }
     }
 }

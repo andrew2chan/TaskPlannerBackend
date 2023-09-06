@@ -54,5 +54,11 @@ namespace TaskPlanner.Repositories
             var saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
+
+        public bool UpdateActivity(Activities activity)
+        {
+            _context.Update(activity);
+            return Save();
+        }
     }
 }
