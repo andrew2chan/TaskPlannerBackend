@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskPlanner.DTOs;
 using TaskPlanner.Interfaces;
@@ -6,6 +7,7 @@ using TaskPlanner.Models;
 
 namespace TaskPlanner.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ActivitiesController : ControllerBase
@@ -147,8 +149,6 @@ namespace TaskPlanner.Controllers
             
             activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToLocalTime();
             activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToLocalTime();
-
-            Console.WriteLine(activity.PlannedTasksId);
 
             activityMap.PlannedTasksId = activity.PlannedTasksId;
             activityMap.PlannedTasks = _plannedTasksRepository.GetAllPlannedTasks().Where(pt => pt.Id == activity.PlannedTasksId).FirstOrDefault();

@@ -1,5 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using TaskPlanner.DTOs;
 using TaskPlanner.Interfaces;
@@ -15,12 +20,14 @@ namespace TaskPlanner.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IPlannedTasksRepository _plannedTasksRepository;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
-        public UserController(IUserRepository userRepository, IPlannedTasksRepository plannedTasksRepository, IMapper mapper)
+        public UserController(IUserRepository userRepository, IPlannedTasksRepository plannedTasksRepository, IMapper mapper, IConfiguration config)
         {
             _userRepository = userRepository;
             _plannedTasksRepository = plannedTasksRepository;
             _mapper = mapper;
+            _config = config;
         }
 
         [HttpGet]
@@ -104,6 +111,7 @@ namespace TaskPlanner.Controllers
             return Ok("Created!");
         }
 
+        [Authorize]
         [HttpDelete("{userId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -128,6 +136,7 @@ namespace TaskPlanner.Controllers
             return Ok("Deleted!");
         }
 
+        [Authorize]
         [HttpPut("{userId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
@@ -181,15 +190,37 @@ namespace TaskPlanner.Controllers
             if (retrievedUser.Password != user.Password)
                 return BadRequest();
 
+            var claims = new[] {
+                new Claim(JwtRegisteredClaimNames.Sub, _config["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                new Claim("id", retrievedUser.Id.ToString()),
+                new Claim("email", retrievedUser.Email),
+                new Claim("name", retrievedUser.Name),
+                new Claim("plannedTasksId", plannedTaskByUserId.Id.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddDays(30),
+                signingCredentials: signIn);
+
             var returnObject = new
             {
                 id = retrievedUser.Id,
                 email = retrievedUser.Email,
                 name = retrievedUser.Name,
-                plannedTasksId = plannedTaskByUserId.Id
+                plannedTasksId = plannedTaskByUserId.Id,
+                token = new JwtSecurityTokenHandler().WriteToken(token)
             };
 
             return Ok(returnObject);
+
+            //return Ok(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
         private bool ValidateEmail(string email)
