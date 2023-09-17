@@ -2,6 +2,7 @@
 using SQLitePCL;
 using TaskPlanner.Context;
 using TaskPlanner.DTOs;
+using TaskPlanner.Helper;
 using TaskPlanner.Interfaces;
 using TaskPlanner.Models;
 
@@ -10,10 +11,12 @@ namespace TaskPlanner.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly DataContext _context;
+        private readonly LoginHelper _loginHelper;
 
         public UserRepository(DataContext context)
         {
             _context = context;
+            _loginHelper = new LoginHelper();
         }
 
         public bool CreateUser(User user)
@@ -63,12 +66,17 @@ namespace TaskPlanner.Repositories
         {
             var user = _context.Users.Where(u => u.Id == userId).FirstOrDefault();
 
+            string salt = _loginHelper.GenerateSalt();
+            string hashedPassword = _loginHelper.HashPassword(userdto.Password, salt);
+
             user.Email = userdto.Email;
             user.Name = userdto.Name;
 
-            if (userdto.Password.Length > 0) //if no password is entered
+            if (userdto.Password.Length > 0) //if password needs to be updated
             {
-                user.Password = userdto.Password;
+                user.Salt = salt;
+                user.HashedPassword = hashedPassword;
+                //user.Password = userdto.Password;
             }
 
             //_context.Update(user);

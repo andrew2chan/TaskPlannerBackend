@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using TaskPlanner.DTOs;
+using TaskPlanner.Helper;
 using TaskPlanner.Interfaces;
 using TaskPlanner.Models;
 
@@ -21,6 +22,7 @@ namespace TaskPlanner.Controllers
         private readonly IPlannedTasksRepository _plannedTasksRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly LoginHelper _loginHelper;
 
         public UserController(IUserRepository userRepository, IPlannedTasksRepository plannedTasksRepository, IMapper mapper, IConfiguration config)
         {
@@ -28,6 +30,7 @@ namespace TaskPlanner.Controllers
             _plannedTasksRepository = plannedTasksRepository;
             _mapper = mapper;
             _config = config;
+            _loginHelper = new LoginHelper();
         }
 
         [HttpGet]
@@ -98,9 +101,13 @@ namespace TaskPlanner.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            string salt = _loginHelper.GenerateSalt();
+            string hashedPassword = _loginHelper.HashPassword(user.Password, salt);
+
             var newUser = _mapper.Map<User>(user);
-            newUser.HashedPassword = "placeholder hashed pass";
-            newUser.Salt = "placeholder salt";
+            newUser.HashedPassword = hashedPassword;
+            newUser.Salt = salt;
+            newUser.Password = ""; //set the password to null so we don't save plain text password
 
             if (!_userRepository.CreateUser(newUser))
             {
@@ -187,7 +194,9 @@ namespace TaskPlanner.Controllers
             var retrievedUser = _userRepository.GetUser(user.Email);
             var plannedTaskByUserId = _plannedTasksRepository.GetPlannedTaskByUserId(retrievedUser.Id);
 
-            if (retrievedUser.Password != user.Password)
+            string hashedPassword = _loginHelper.HashPassword(user.Password, retrievedUser.Salt);
+
+            if (hashedPassword != retrievedUser.HashedPassword)
                 return BadRequest();
 
             var claims = new[] {
