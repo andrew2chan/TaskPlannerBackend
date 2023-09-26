@@ -1,10 +1,10 @@
-name: Build and deploy .NET Core application to Web App TaskPlanner20230925202903
+name: Build and deploy .NET Core application to Web App BackendTaskPlanner
 on:
   push:
     branches:
     - master
 env:
-  AZURE_WEBAPP_NAME: TaskPlanner20230925202903
+  AZURE_WEBAPP_NAME: BackendTaskPlanner
   AZURE_WEBAPP_PACKAGE_PATH: TaskPlanner\publish
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
@@ -44,5 +44,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.TaskPlanner20230925202903_CAFC }}
+        publish-profile: ${{ secrets.BackendTaskPlanner_49A5 }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
