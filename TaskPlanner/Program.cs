@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost/3000", "https://localhost/7108", "https://taskplanner20230925202903.azurewebsites.net")
+            policy.WithOrigins("https://localhost/3000", "https://localhost/7108", "https://backendtaskplanner.azurewebsites.net")
             .AllowAnyHeader()
             .AllowAnyOrigin()
             .AllowAnyMethod();
