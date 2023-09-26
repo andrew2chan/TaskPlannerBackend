@@ -11,14 +11,14 @@ using TaskPlanner.Context;
 namespace TaskPlanner.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230805020108_InitialCreate")]
+    [Migration("20230926013528_Initial-Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.10");
 
             modelBuilder.Entity("TaskPlanner.Models.Activities", b =>
                 {
