@@ -94,8 +94,8 @@ namespace TaskPlanner.Controllers
             var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
             activityMap.PlannedTasksId = plannedTask.Id; //fill in the foreign key
             
-            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToLocalTime();
-            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToLocalTime();
+            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToUniversalTime();
+            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToUniversalTime();
 
             if (!_activitiesRepository.CreateActivity(activityMap))
             {
@@ -147,8 +147,8 @@ namespace TaskPlanner.Controllers
 
             var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
             
-            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToLocalTime();
-            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToLocalTime();
+            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToUniversalTime();
+            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToUniversalTime();
 
             activityMap.PlannedTasksId = activity.PlannedTasksId;
             activityMap.PlannedTasks = _plannedTasksRepository.GetAllPlannedTasks().Where(pt => pt.Id == activity.PlannedTasksId).FirstOrDefault();
