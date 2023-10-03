@@ -35,8 +35,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("TestDbConnection"));
-    //options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    //options.UseSqlite(builder.Configuration.GetConnectionString("TestDbConnection"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
