@@ -94,8 +94,8 @@ namespace TaskPlanner.Controllers
             var activityMapMod = new ActivitiesDto
             {
                 ActivityName = activity.ActivityName,
-                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime),
-                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime),
+                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime).ToUniversalTime(),
+                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime).ToUniversalTime(),
                 PlannedTasksId = plannedTask.Id
             };
 
@@ -164,8 +164,8 @@ namespace TaskPlanner.Controllers
             {
                 Id = activity.Id,
                 ActivityName = activity.ActivityName,
-                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime),
-                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime),
+                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime).ToUniversalTime(),
+                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime).ToUniversalTime(),
                 PlannedTasksId = activity.PlannedTasksId
             };
 
