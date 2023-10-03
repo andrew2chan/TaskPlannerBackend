@@ -77,7 +77,7 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult CreateActivity([FromQuery] int userId, [FromBody] ActivitiesDto activity)
+        public IActionResult CreateActivity([FromQuery] int userId, [FromBody] ActivitiesDtoMod activity)
         {
 
             if (!_userRepository.UserExists(userId))
@@ -91,11 +91,24 @@ namespace TaskPlanner.Controllers
 
             var plannedTask = _plannedTasksRepository.GetAllPlannedTasks().Where(pt => pt.UserId == userId).FirstOrDefault();
 
-            var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
-            activityMap.PlannedTasksId = plannedTask.Id; //fill in the foreign key
-            
-            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToUniversalTime();
-            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToUniversalTime();
+            var activityMapMod = new ActivitiesDto
+            {
+                ActivityName = activity.ActivityName,
+                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime),
+                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime),
+                PlannedTasksId = plannedTask.Id
+            };
+
+            var activityMap = _mapper.Map<Activities>(activityMapMod); //map to activities from activitesDTO
+
+            //activityMap.PlannedTasksId = plannedTask.Id; //fill in the foreign key
+
+            Console.WriteLine(activityMap.ActivityStartTime.ToString());
+
+            //activityMap.ActivityStartTime = activityMap.ActivityStartTime;
+            //activityMap.ActivityEndTime = activityMap.ActivityEndTime;
+
+            //Console.WriteLine(activityMap.ActivityStartTime.ToString());
 
             if (!_activitiesRepository.CreateActivity(activityMap))
             {
@@ -134,7 +147,7 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
-        public IActionResult UpdateActivity([FromBody] ActivitiesDto activity)
+        public IActionResult UpdateActivity([FromBody] ActivitiesDtoMod activity)
         {
             if (!_activitiesRepository.ActivitiesExists(activity.Id))
                 return NotFound();
@@ -145,12 +158,25 @@ namespace TaskPlanner.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var activityMap = _mapper.Map<Activities>(activity); //map to activities from activitesDTO
-            
-            activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToUniversalTime();
-            activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToUniversalTime();
+            Console.WriteLine(activity.ActivityStartTime.ToString());
 
-            activityMap.PlannedTasksId = activity.PlannedTasksId;
+            var activityMapMod = new ActivitiesDto
+            {
+                Id = activity.Id,
+                ActivityName = activity.ActivityName,
+                ActivityStartTime = DateTime.Parse(activity.ActivityStartTime),
+                ActivityEndTime = DateTime.Parse(activity.ActivityEndTime),
+                PlannedTasksId = activity.PlannedTasksId
+            };
+
+            Console.WriteLine(activityMapMod.ActivityStartTime.ToString());
+
+            var activityMap = _mapper.Map<Activities>(activityMapMod); //map to activities from activitesDTO
+            
+            //activityMap.ActivityStartTime = activityMap.ActivityStartTime.ToUniversalTime();
+            //activityMap.ActivityEndTime = activityMap.ActivityEndTime.ToUniversalTime();
+
+            //activityMap.PlannedTasksId = activity.PlannedTasksId;
             activityMap.PlannedTasks = _plannedTasksRepository.GetAllPlannedTasks().Where(pt => pt.Id == activity.PlannedTasksId).FirstOrDefault();
 
             if (!_activitiesRepository.UpdateActivity(activityMap))
