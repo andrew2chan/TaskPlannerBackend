@@ -33,6 +33,13 @@ namespace TaskPlanner.Controllers
             _loginHelper = new LoginHelper();
         }
 
+        [HttpGet("testconfirmation")]
+        [ProducesResponseType(200)]
+        public IActionResult GetTest()
+        {
+            return Ok("Working!");
+        }
+
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
         [ProducesResponseType(400)]
@@ -69,6 +76,7 @@ namespace TaskPlanner.Controllers
         [ProducesResponseType(500)]
         public IActionResult CreateUser([FromBody] UserDto user)
         {
+            Console.WriteLine("Test");
             if (user == null)
                 return BadRequest(ModelState);
 
